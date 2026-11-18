@@ -32,3 +32,4 @@ See the [zopen porting guide](https://zopen.community/#/Guides/Porting) for more
 
 # Contributing
 Contributions are welcome! Please follow the [zopen contribution guidelines](https://github.com/zopencommunity/meta/blob/main/CONTRIBUTING.md).
+Workflows to be added: build_and_test.yml, bump.yml (from gitport)
