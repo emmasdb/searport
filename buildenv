@@ -43,6 +43,12 @@ if [ "${SEAR_BUILD_PYTHON:-${sear_default_python}}" = 1 ]; then
   zopen_pre_build() {
     export OPENSSL_ROOT="${OPENSSL_HOME}"
     export ZOSLIB_ROOT="${ZOSLIB_HOME}"
+    sear_cxxflags=" ${CXXFLAGS:-} "
+    case "${sear_cxxflags}" in
+      *" -mnocsect "*)
+        export CXXFLAGS="${sear_cxxflags%% -mnocsect *} ${sear_cxxflags#* -mnocsect }"
+        ;;
+    esac
     if [ "${ZOPEN_BUILD_LINE}" = STABLE ]; then
       export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_PYSEAR="$(zopen_get_version)"
     fi
