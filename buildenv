@@ -53,17 +53,19 @@ if [ "${SEAR_BUILD_PYTHON:-0}" = 1 ]; then
   }
 
   zopen_check_results() {
-    awk '
+    awk -v versions="${ZOPEN_PYTHON_VERSIONS}" '
       /Running tests with Python/ { runs++ }
       /^SEAR_IMPORT_OK$/ { passed++ }
       /^SEAR_IMPORT_FAILED$/ { failed++ }
       END {
+        expected = split(versions, interpreters)
+        if (runs > expected) expected = runs
         total = passed + failed
-        if (runs > total) {
-          failed += runs - total
-          total = runs
+        if (expected > total) {
+          failed += expected - total
+          total = expected
         }
-        printf "actualFailures:%d\ntotalTests:%d\nexpectedFailures:0\nexpectedTotalTests:1\n", failed, total
+        printf "actualFailures:%d\ntotalTests:%d\nexpectedFailures:0\nexpectedTotalTests:%d\n", failed, total, expected
       }
     ' "$1/$2_check.log"
   }
