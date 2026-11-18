@@ -18,7 +18,12 @@ export ZOPEN_CATEGORIES="security"
 export ZOPEN_RUNTIME_DEPS=""
 # export ZOPEN_SYSTEM_PREREQ="zos25" # optional system pre-req (default=zos25)
 
-if [ "${SEAR_BUILD_PYTHON:-0}" = 1 ]; then
+sear_default_python=0
+if [ "${ZOPEN_IS_BOT:-0}" = 1 ] && [ -z "${PAX_RPM_OPTIONS:-}" ]; then
+  sear_default_python=1
+fi
+
+if [ "${SEAR_BUILD_PYTHON:-${sear_default_python}}" = 1 ]; then
   export ZOPEN_PROJECT_NAME="pysear"
   export ZOPEN_BUILD_SYSTEM="Python"
   export ZOPEN_PYTHON_VERSIONS="${ZOPEN_PYTHON_VERSIONS:-3.13}"
