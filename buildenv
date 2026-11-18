@@ -18,6 +18,56 @@ export ZOPEN_CATEGORIES="security"
 export ZOPEN_RUNTIME_DEPS=""
 # export ZOPEN_SYSTEM_PREREQ="zos25" # optional system pre-req (default=zos25)
 
+if [ "${SEAR_BUILD_PYTHON:-0}" = 1 ]; then
+  export ZOPEN_PROJECT_NAME="pysear"
+  export ZOPEN_BUILD_SYSTEM="Python"
+  export ZOPEN_PYTHON_VERSIONS="${ZOPEN_PYTHON_VERSIONS:-3.13}"
+  export ZOPEN_PATCH_DIR="python-patches"
+  export ZOPEN_STABLE_DEPS="openssl"
+  export ZOPEN_DEV_DEPS="openssl"
+  export ZOPEN_RUNTIME_DEPS="openssl"
+
+  zopen_post_buildenv() {
+    if [ "${ZOPEN_BUILD_LINE}" = STABLE ]; then
+      export ZOPEN_NAME="pysear-$(zopen_get_version)"
+    else
+      export ZOPEN_NAME="pysear-DEV"
+    fi
+  }
+
+  zopen_pre_build() {
+    export OPENSSL_ROOT="${OPENSSL_HOME}"
+    export ZOSLIB_ROOT="${ZOSLIB_HOME}"
+    if [ "${ZOPEN_BUILD_LINE}" = STABLE ]; then
+      export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_PYSEAR="$(zopen_get_version)"
+    fi
+  }
+
+  zopen_python_test() {
+    if python -I -c 'import sear._C; from sear import sear'; then
+      echo 'SEAR_IMPORT_OK'
+    else
+      echo 'SEAR_IMPORT_FAILED'
+      return 1
+    fi
+  }
+
+  zopen_check_results() {
+    awk '
+      /Running tests with Python/ { runs++ }
+      /^SEAR_IMPORT_OK$/ { passed++ }
+      /^SEAR_IMPORT_FAILED$/ { failed++ }
+      END {
+        total = passed + failed
+        if (runs > total) {
+          failed += runs - total
+          total = runs
+        }
+        printf "actualFailures:%d\ntotalTests:%d\nexpectedFailures:0\nexpectedTotalTests:1\n", failed, total
+      }
+    ' "$1/$2_check.log"
+  }
+else
 
 ###
 ### Build settings (Port type: BUILD, Build system: CMake)
@@ -49,9 +99,11 @@ zopen_check_results() {
   echo "expectedFailures:0"
   echo "expectedTotalTests:1"
 }
+fi
 
 zopen_get_version() {
-  echo "0.7.1" # Modify to echo the version of your tool/library
+  sear_release=${ZOPEN_STABLE_URL##*/v}
+  printf '%s\n' "${sear_release%.tar.gz}"
 }
 
 
