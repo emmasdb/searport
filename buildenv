@@ -26,6 +26,7 @@ fi
 if [ "${SEAR_BUILD_PYTHON:-${sear_default_python}}" = 1 ]; then
   export ZOPEN_PROJECT_NAME="pysear"
   export ZOPEN_BUILD_SYSTEM="Python"
+  export ZOPEN_COMP="${ZOPEN_COMP:-openxl}"
   export ZOPEN_PYTHON_VERSIONS="${ZOPEN_PYTHON_VERSIONS:-3.13}"
   export ZOPEN_PATCH_DIR="python-patches"
   export ZOPEN_STABLE_DEPS="openssl"
@@ -43,12 +44,9 @@ if [ "${SEAR_BUILD_PYTHON:-${sear_default_python}}" = 1 ]; then
   zopen_pre_build() {
     export OPENSSL_ROOT="${OPENSSL_HOME}"
     export ZOSLIB_ROOT="${ZOSLIB_HOME}"
-    sear_cxxflags=" ${CXXFLAGS:-} "
-    case "${sear_cxxflags}" in
-      *" -mnocsect "*)
-        export CXXFLAGS="${sear_cxxflags%% -mnocsect *} ${sear_cxxflags#* -mnocsect }"
-        ;;
-    esac
+    if [ "${ZOPEN_IS_BOT:-0}" = 1 ]; then
+      export LDFLAGS="${LDFLAGS:+${LDFLAGS} }-Wl,-b,map -Wl,-b,xref"
+    fi
     if [ "${ZOPEN_BUILD_LINE}" = STABLE ]; then
       export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_PYSEAR="$(zopen_get_version)"
     fi
