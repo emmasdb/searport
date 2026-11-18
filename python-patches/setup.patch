@@ -21,6 +21,18 @@ diff --git a/setup.py b/setup.py
  def assemble(asm_file: str, asm_directory: Path) -> None:
      """Assemble assembler code."""
      obj_file = asm_file.split(".")[0] + ".o"
+@@ -71,7 +62,7 @@ class BuildExtensionWithAssemblerAndC(build_ext):
+-        os.environ["CC"] = "ibm-clang64"
+-        os.environ["CFLAGS"] = "-std=c99"
+-        os.environ["CXX"] = "ibm-clang++64"
+-        os.environ["CXXFLAGS"] = "-std=c++17"
++        os.environ.setdefault("CC", "clang")
++        os.environ.setdefault("CXX", "clang++")
++        os.environ["CFLAGS"] = f"{os.environ.get('CFLAGS', '')} -std=c99".strip()
++        os.environ["CXXFLAGS"] = f"{os.environ.get('CXXFLAGS', '')} -std=c++17".strip()
+         sear_source_path = Path("sear")
+         assemble("irrseq00.s", sear_source_path / "irrseq00")
+         super().run()
 @@ -93,7 +84,7 @@ def main():
              + "Alternatively set ZOSLIB_ROOT and OPENSSL_ROOT",
          )
